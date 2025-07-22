@@ -122,41 +122,7 @@ const Map: React.FC<MapProps> = ({
       )}
 
       {/* Bottom Sheet for Mobile */}
-      {isMobile && showBottomSheet && (
-        // <div className="absolute bottom-0 left-0 w-full bg-white rounded-t-xl shadow-xl z-20 p-4 max-h-[70%] overflow-auto transition-all animate-slide-up">
-        //   {/* Drag handle */}
-        //   <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
-
-        //   {/* Header with Title and Close */}
-        //   <div className="flex justify-between items-center mb-2">
-        //     <h2 className="text-base font-semibold">Project</h2>
-        //     <button
-        //       className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
-        //       onClick={() => setShowBottomSheet(false)}
-        //     >
-        //       <IoMdClose size={18} />
-        //     </button>
-        //   </div>
-
-        //   {/* Filters row */}
-        //   <div className="flex items-center gap-2 mb-3">
-        //     <LuSlidersHorizontal className="text-gray-600" size={18} />
-        //     {["Price", "Available", "Type", "New"].map((label) => (
-        //       <button
-        //         key={label}
-        //         className="text-xs px-3 py-1 rounded bg-gray-100 text-gray-700"
-        //       >
-        //         {label}
-        //       </button>
-        //     ))}
-        //   </div>
-
-        //   <div className="space-y-2">
-        //     {/* Dynamic result cards will go here */}
-        //   </div>
-        // </div>
-        <BottomSheet />
-      )}
+      {isMobile && showBottomSheet && <BottomSheet />}
     </div>
   );
 };

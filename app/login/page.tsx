@@ -2,9 +2,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getFcmToken } from "@/app/lib/getFcmToken";
+import { startSession } from "@/app/lib/auth";
+
+const BASE_URL = "https://homeintownback.hiteshstorehub.in/public/api";
 
 async function loginCustomer(mobile: string) {
-  const res = await fetch("/api/login", {
+  const res = await fetch(`${BASE_URL}/login_customer`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mobile }),
@@ -26,7 +29,7 @@ async function verifyOtp({
   fcm_token_app: string;
   fcm_token_web: string;
 }) {
-  const res = await fetch("/api/verify-otp", {
+  const res = await fetch(`${BASE_URL}/verify_otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -37,7 +40,6 @@ async function verifyOtp({
       fcm_token_web,
     }),
   });
-  console.log(res);
 
   return await res.json();
 }
@@ -49,6 +51,7 @@ export default function Login() {
   const [step, setStep] = useState<"login" | "otp">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [receivedOtp, setReceivedOtp] = useState("");
 
   const handleLogin = async () => {
     setLoading(true);
@@ -57,6 +60,7 @@ export default function Login() {
     try {
       const res = await loginCustomer(mobile);
       if (res.status === 1) {
+        setReceivedOtp(res.otp);
         setStep("otp");
       } else {
         setError(res.message || "Failed to send OTP.");
@@ -69,34 +73,6 @@ export default function Login() {
     }
   };
 
-  // const handleVerify = async () => {
-  //   setLoading(true);
-  //   setError("");
-
-  //   try {
-  //     const fcmToken = await getFcmToken();
-
-  //     const res = await verifyOtp({
-  //       mobile,
-  //       otp,
-  //       customer_name: "abc",
-  //       fcm_token_app: fcmToken ?? "",
-  //       fcm_token_web: fcmToken ?? "",
-  //     });
-
-  //     if (res.status === 1) {
-  //       console.log("Login successful:", res);
-  //       // Redirect or store token here
-  //       router.push("../main/map");
-  //     } else {
-  //       setError(res.message || "OTP verification failed.");
-  //     }
-  //   } catch (err) {
-  //     setError("Something went wrong during verification.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   const handleVerify = async () => {
     setLoading(true);
     setError("");
@@ -112,18 +88,13 @@ export default function Login() {
         fcm_token_web: fcmToken ?? "",
       });
 
-      if (res.status === 1) {
-        console.log("Login successful:", res);
-
-        const apiKey = res.api_key;
-
-        if (!apiKey) {
-          setError("API key not returned.");
-          return;
-        }
-
-        // 💾 Store it in localStorage or sessionStorage
-        localStorage.setItem("google_maps_api_key", apiKey);
+      if (Number(res.status) === 1) {
+        startSession({
+          access_token: res.access_token,
+          customer_id: res.customer_detsil.customer_id.toString(),
+          customer_name: res.customer_detsil.customer_name,
+          api_key: res.api_key,
+        });
 
         router.push("../main/map");
       } else {
@@ -131,6 +102,7 @@ export default function Login() {
       }
     } catch (err) {
       setError("Something went wrong during verification.");
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -173,6 +145,11 @@ export default function Login() {
               placeholder="Enter OTP"
               className="w-full mb-4 p-3 border rounded text-sm"
             />
+            {receivedOtp && (
+              <div className="mb-4 text-sm text-gray-500">
+                <span className="font-medium">OTP:</span> {receivedOtp}
+              </div>
+            )}
             <button
               onClick={handleVerify}
               disabled={loading}

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { GoogleMap, Marker } from "@react-google-maps/api";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Sidebar from "./Sidebar";
 
 const containerStyle = {
@@ -37,7 +38,6 @@ const MapView = () => {
 
     if (!apiKey) {
       console.error("No API key found. Redirect to login.");
-      // Optional: redirect or show error
       return;
     }
 
@@ -46,7 +46,13 @@ const MapView = () => {
       .catch(console.error);
   }, []);
 
-  if (!isMapReady) return <p>Loading map...</p>;
+  if (!isMapReady) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-white">
+        <AiOutlineLoading3Quarters className="text-4xl text-blue-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>

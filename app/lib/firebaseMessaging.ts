@@ -1,4 +1,3 @@
-// lib/firebaseMessaging.ts
 "use client";
 
 import { getMessaging } from "firebase/messaging";

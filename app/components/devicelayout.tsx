@@ -2,6 +2,9 @@
 import { useEffect, useState, useRef } from "react";
 import Sidebar from "./Sidebar";
 import Map from "../main/map/Map";
+import { AiOutlineLogout } from "react-icons/ai";
+import { useRouter } from "next/navigation";
+import { endSession } from "../lib/auth";
 
 const DeviceLayout = ({ children }: { children: React.ReactNode }) => {
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -9,6 +12,7 @@ const DeviceLayout = ({ children }: { children: React.ReactNode }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const router = useRouter();
 
   const handleSearch = () => {
     if (!searchQuery) return;
@@ -82,6 +86,16 @@ const DeviceLayout = ({ children }: { children: React.ReactNode }) => {
         setShowBottomSheet={setShowBottomSheet}
       />
       <main className="hidden">{children}</main>
+      <button
+        onClick={() => {
+          endSession();
+          router.push("/login");
+        }}
+        className="fixed top-4 right-4 z-50 bg-white rounded-full shadow-lg p-2 hover:bg-red-100 transition"
+        title="Logout"
+      >
+        <AiOutlineLogout />
+      </button>
     </div>
   );
 };

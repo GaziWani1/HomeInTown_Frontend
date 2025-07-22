@@ -17,7 +17,13 @@ export async function POST(req: NextRequest) {
     console.log(data, "OTP Verify");
 
     return NextResponse.json(
-      { data, google_maps_api_key: data.api_key },
+      {
+        status: data.status,
+        message: data.message,
+        access_token: data.access_token,
+        api_key: data.api_key,
+        customer_details: data.customer_details,
+      },
       { status: backendRes.status }
     );
   } catch (error: unknown) {
