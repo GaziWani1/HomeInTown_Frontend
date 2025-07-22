@@ -1,12 +1,6 @@
 "use client";
-import React, { useRef, useState } from "react";
-import {
-  GoogleMap,
-  Marker,
-  useJsApiLoader,
-  Libraries,
-} from "@react-google-maps/api";
-
+import { useEffect, useRef, useState } from "react";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 import Sidebar from "./Sidebar";
 
 const containerStyle = {
@@ -14,37 +8,54 @@ const containerStyle = {
   height: "100vh",
 };
 
-const center = {
-  lat: 18.5204, // Pune coordinates
+const defaultCenter = {
+  lat: 18.5204,
   lng: 73.8567,
 };
 
-const libraries: Libraries = ["places"];
+const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (document.getElementById("google-maps-script")) return resolve();
+
+    const script = document.createElement("script");
+    script.id = "google-maps-script";
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject("Failed to load Google Maps.");
+    document.body.appendChild(script);
+  });
+};
 
 const MapView = () => {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-    libraries,
-  });
-
   const mapRef = useRef<google.maps.Map | null>(null);
-  const [mapCenter, setMapCenter] = useState(center);
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
+  const [isMapReady, setIsMapReady] = useState(false);
 
-  if (!isLoaded) return <p>Loading map...</p>;
+  useEffect(() => {
+    const apiKey = localStorage.getItem("google_maps_api_key");
+
+    if (!apiKey) {
+      console.error("No API key found. Redirect to login.");
+      // Optional: redirect or show error
+      return;
+    }
+
+    loadGoogleMapsScript(apiKey)
+      .then(() => setIsMapReady(true))
+      .catch(console.error);
+  }, []);
+
+  if (!isMapReady) return <p>Loading map...</p>;
 
   return (
     <>
-      {/* Assuming Sidebar is defined/imported elsewhere */}
       <Sidebar
         mapRef={mapRef}
         setMapCenter={setMapCenter}
-        handleSearch={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-        searchQuery={""}
-        setSearchQuery={function (): void {
-          throw new Error("Function not implemented.");
-        }}
+        handleSearch={() => {}}
+        searchQuery=""
+        setSearchQuery={() => {}}
       />
       <GoogleMap
         center={mapCenter}
@@ -60,4 +71,4 @@ const MapView = () => {
   );
 };
 
-export default React.memo(MapView);
+export default MapView;

@@ -37,6 +37,27 @@ const DeviceLayout = ({ children }: { children: React.ReactNode }) => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
+
+    // Get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setMapCenter({ lat: latitude, lng: longitude });
+          if (mapRef.current) {
+            mapRef.current.setCenter({ lat: latitude, lng: longitude });
+            mapRef.current.setZoom(16);
+          }
+        },
+        (error) => {
+          console.warn("Geolocation permission denied or unavailable.", error);
+          // Optional: keep default location (Pune)
+        }
+      );
+    } else {
+      console.warn("Geolocation is not supported by this browser.");
+    }
+
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
